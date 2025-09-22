@@ -1,84 +1,63 @@
-# Race Classification with YOLO and CNN Model
+# Local Prediction (Quick Start)
 
-## Project Overview
+This project includes a Jupyter notebook to run a local prediction using a pre-trained Keras `.h5` model on a sample image.
 
-This project aims to classify human faces into different race categories using a deep learning model based on the InceptionV3 architecture, combined with the YOLOv8 object detection model to detect faces in images. The workflow includes:
-1. Detecting faces in an image using YOLOv8.
-2. Cropping the detected face regions.
-3. Classifying the race of each detected face using a pre-trained CNN model.
+## Prerequisites
+- Python 3.9–3.11 recommended
+- macOS ARM users (Apple Silicon): TensorFlow is configured via `tensorflow-macos` and `tensorflow-metal` in `requirements.txt`.
+- Model file: `Race Classification Model.h5` present in the repo root.
 
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Dataset](#dataset)
-- [Preprocessing](#preprocessing)
-- [Model Architecture](#model-architecture)
-- [Training](#training)
-- [YOLO Object Detection](#yolo-object-detection)
-- [Evaluation](#evaluation)
+## Setup
+1. Create and activate a virtual environment (recommended):
 
-## Dataset
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-The project uses the FairFace dataset, which contains images labeled into different race categories:
-- **White** (combined with Middle Eastern and Latino)
-- **Black** (combined with Indian)
-- **Asian**
+2. Install dependencies:
 
-### Dataset Structure
-The dataset has been grouped into 4 main categories:
-1. **White** (White, Middle Eastern, Latino)
-2. **Black** (Black, Indian)
-3. **Asian** (East Asian)
+```bash
+pip install -r requirements.txt
+# If you don't have Jupyter installed:
+pip install notebook
+```
 
-#### Example folder structure:
-/train 
-  /White
-  /Black 
-  /Asian
-/val
-  /White
-  /Black
-  /Asian
+3. (Optional, macOS ARM) Verify TensorFlow uses Metal acceleration:
 
-## Preprocessing
+```bash
+python -c "import tensorflow as tf; print(tf.__version__)"
+```
 
-### Image Preprocessing:
-- **Resizing**: All images were resized to 224x224 pixels.
-- **Normalization**: Pixel values were normalized between 0 and 1.
-- **Data Augmentation**: Augmentation techniques such as flipping and rotation were applied to the training dataset to increase generalization.
+## Run the Notebook
+1. Launch Jupyter:
 
-## Model Architecture
+```bash
+python -m ipykernel install --user --name=rc-local
+jupyter notebook
+```
 
-### InceptionV3-based CNN
-- The race classification model was built using **InceptionV3** as a base model with pre-trained weights from ImageNet.
-- The final layers of the model consist of a global average pooling layer, followed by a dense layer with 1024 units and a softmax activation for 3 output classes.
+2. Open `run_local_prediction.ipynb`.
 
-### YOLOv8 for Face Detection
-- **YOLOv8** object detection was used to detect persons in an image. The model crops the detected regions and passes them to the race classifier for prediction.
+3. In the first code cell, set the paths if needed. Defaults expect:
+- `MODEL_PATH`: `"/Users/jeron/projects/Race-Classification/Race Classification Model.h5"` (update to this repo path if different)
+- `TEST_IMAGE_PATH`: path to your image. To use the sample provided in this repo, set:
 
-## Training
+```python
+MODEL_PATH = "/Users/jeron/projects/Race-Classification-1/Race Classification Model.h5"
+TEST_IMAGE_PATH = "/Users/jeron/projects/Race-Classification-1/sample.jpg"
+```
 
-- The model was trained on the **FairFace** dataset with the following specifications:
-  - **Batch Size**: 32
-  - **Image Size**: 224x224
-  - **Optimizer**: Adam
-  - **Loss Function**: Sparse Categorical Crossentropy
-  - **Accuracy Achieved**: 83% (Initial model performance)
+4. Run all cells (Kernel → Restart & Run All). You should see:
+- TensorFlow version and existence checks
+- Model summary
+- Predicted class and probabilities
+- Visualization of the input image with predicted label
 
-## YOLO Object Detection
+## Optional: YOLOv8 Detection First
+If you also want to detect people/faces before classification, ensure `ultralytics` and `opencv-python` are installed (already in `requirements.txt`). The last notebook section runs YOLOv8 and classifies crops.
 
-**YOLOv8** detects faces in input images, and only the cropped faces are passed to the classifier. Some custom logic was added to filter out blurred images or low-quality detections using a confidence threshold.
-
-## Evaluation
-
-The model was evaluated on a validation dataset using:
-- **Accuracy**: Primary metric for evaluating model performance.
-- **Confusion Matrix**: Used to understand the distribution of misclassifications across different classes.
-
-
-
-
-
-
-
-
-
+## Troubleshooting
+- If you see `ModuleNotFoundError: No module named 'numpy'`, ensure the virtual environment is activated and `pip install -r requirements.txt` was successful.
+- If TensorFlow fails to import on Apple Silicon, ensure you are using Python 3.9–3.11 and the `tensorflow-macos`/`tensorflow-metal` wheels are installed via the provided `requirements.txt`.
+- If the model file path is wrong, update `MODEL_PATH` to point to `Race Classification Model.h5` in this repo.
